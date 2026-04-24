@@ -1,0 +1,42 @@
+<div class="timeline-block">
+  <h3>Activity Timeline</h3>
+  {% if activities or notes %}
+    <ul class="timeline">
+      {% for a in activities %}
+        <li class="{{ 'overdue' if a.is_overdue else '' }}">
+          <span class="tag">{{ a.type }}</span>
+          <strong>{{ a.subject }}</strong>
+          {% if a.status == 'Completed' %}<span class="tag tag-green">Completed</span>{% endif %}
+          {% if a.due_date %}<span class="muted small">· due {{ a.due_date.isoformat() }}</span>{% endif %}
+          {% if a.description %}<div class="muted small">{{ a.description }}</div>{% endif %}
+          <div class="muted small">{{ a.created_at.strftime('%b %d, %H:%M') }} · {{ a.owner.name if a.owner else '' }}
+            {% if a.status != 'Completed' %}
+              · <form method="post" action="{{ url_for('activities_complete', activity_id=a.id) }}" class="inline">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button class="btn-link">Mark complete</button>
+                </form>
+            {% endif %}
+            · <form method="post" action="{{ url_for('activities_delete', activity_id=a.id) }}" class="inline">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button class="btn-link danger" onclick="return confirm('Delete activity?')">Delete</button>
+              </form>
+          </div>
+        </li>
+      {% endfor %}
+      {% for n in notes %}
+        <li>
+          <span class="tag tag-gray">Note</span>
+          <div>{{ n.body }}</div>
+          <div class="muted small">{{ n.created_at.strftime('%b %d, %H:%M') }} · {{ n.author.name if n.author else '' }}
+            · <form method="post" action="{{ url_for('notes_delete', note_id=n.id) }}" class="inline">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button class="btn-link danger" onclick="return confirm('Delete note?')">Delete</button>
+              </form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">No activity logged yet.</p>
+  {% endif %}
+</div>

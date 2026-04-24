@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ account.name }} · VECO{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="muted small">Account</div>
+    <h1>{{ account.name }}</h1>
+    <p class="muted">{{ account.industry or '—' }}{% if account.billing_city %} · {{ account.billing_city }}{% if account.billing_country %}, {{ account.billing_country }}{% endif %}{% endif %}</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn" href="{{ url_for('accounts_edit', account_id=account.id) }}">Edit</a>
+    <form method="post" action="{{ url_for('accounts_delete', account_id=account.id) }}" class="inline" onsubmit="return confirm('Delete this account and all related contacts/opps?')">
+      <button class="btn btn-danger">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="grid grid-3-1">
+  <div>
+    <section class="card">
+      <h2>Details</h2>
+      <dl class="kv">
+        <dt>Phone</dt><dd>{{ account.phone or '—' }}</dd>
+        <dt>Website</dt><dd>{% if account.website %}<a href="{{ account.website }}" target="_blank" rel="noopener">{{ account.website }}</a>{% else %}—{% endif %}</dd>
+        <dt>Employees</dt><dd>{{ "{:,}".format(account.employees) if account.employees else '—' }}</dd>
+        <dt>Annual revenue</dt><dd>{{ '${:,.0f}'.format(account.annual_revenue) if account.annual_revenue else '—' }}</dd>
+        <dt>Owner</dt><dd>{{ account.owner.name if account.owner else '—' }}</dd>
+        <dt>Created</dt><dd>{{ account.created_at.strftime('%b %d, %Y') }}</dd>
+      </dl>
+      {% if account.description %}<p>{{ account.description }}</p>{% endif %}
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Contacts</h2>
+        <a class="btn" href="{{ url_for('contacts_new', account_id=account.id) }}">+ New Contact</a>
+      </div>
+      {% if account.contacts.count() %}
+      <table class="table"><thead><tr><th>Name</th><th>Title</th><th>Email</th><th>Phone</th></tr></thead>
+        <tbody>{% for c in account.contacts %}
+          <tr><td><a href="{{ url_for('contacts_detail', contact_id=c.id) }}">{{ c.full_name }}</a></td>
+          <td>{{ c.title or '—' }}</td><td>{{ c.email or '—' }}</td><td>{{ c.phone or '—' }}</td></tr>
+        {% endfor %}</tbody>
+      </table>
+      {% else %}<p class="muted">No contacts yet.</p>{% endif %}
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Opportunities</h2>
+        <a class="btn" href="{{ url_for('opps_new', account_id=account.id) }}">+ New Opportunity</a>
+      </div>
+      {% if account.opportunities.count() %}
+      <table class="table"><thead><tr><th>Name</th><th>Stage</th><th class="num">Amount</th><th>Close date</th></tr></thead>
+        <tbody>{% for o in account.opportunities %}
+          <tr>
+            <td><a href="{{ url_for('opps_detail', opp_id=o.id) }}">{{ o.name }}</a></td>
+            <td><span class="stage stage-{{ o.stage|replace(' ', '-')|lower }}">{{ o.stage }}</span></td>
+            <td class="num">${{ "{:,.0f}".format(o.amount or 0) }}</td>
+            <td>{{ o.close_date.isoformat() if o.close_date else '—' }}</td>
+          </tr>
+        {% endfor %}</tbody>
+      </table>
+      {% else %}<p class="muted">No opportunities yet.</p>{% endif %}
+    </section>
+
+    <section class="card">
+      <h2>Log activity</h2>
+      {% set related_kwarg = 'related_account_id' %}{% set related_id = account.id %}
+      {% include "_activity_form.html" %}
+    </section>
+    <section class="card">
+      <h2>Add note</h2>
+      {% set related_kwarg = 'related_account_id' %}{% set related_id = account.id %}
+      {% include "_note_form.html" %}
+    </section>
+
+    {% include "_timeline.html" %}
+  </div>
+</div>
+{% endblock %}

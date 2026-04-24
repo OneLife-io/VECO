@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Tasks · VECO{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Tasks &amp; Activities</h1></div>
+</div>
+<form class="filters" method="get">
+  <select name="scope">
+    <option value="mine" {{ 'selected' if scope == 'mine' else '' }}>Mine</option>
+    <option value="all" {{ 'selected' if scope == 'all' else '' }}>Everyone</option>
+  </select>
+  <select name="status">
+    <option value="">All</option>
+    {% for s in ACTIVITY_STATUSES %}<option value="{{ s }}" {{ 'selected' if status == s else '' }}>{{ s }}</option>{% endfor %}
+  </select>
+  <button class="btn">Apply</button>
+</form>
+<div class="card no-pad">
+<table class="table">
+  <thead><tr><th></th><th>Type</th><th>Subject</th><th>Related to</th><th>Due</th><th>Status</th><th>Owner</th><th></th></tr></thead>
+  <tbody>
+    {% for t in activities %}
+    <tr class="{{ 'overdue' if t.is_overdue else '' }}">
+      <td>{% if t.status != 'Completed' %}<form method="post" action="{{ url_for('activities_complete', activity_id=t.id) }}" class="inline"><input type="hidden" name="next" value="{{ request.full_path }}"><button class="check" title="Complete">✓</button></form>{% else %}<span class="check done">✓</span>{% endif %}</td>
+      <td><span class="tag">{{ t.type }}</span></td>
+      <td>{{ t.subject }}</td>
+      <td>
+        {% if t.related_account %}<a href="{{ url_for('accounts_detail', account_id=t.related_account.id) }}">{{ t.related_account.name }}</a>
+        {% elif t.related_contact %}<a href="{{ url_for('contacts_detail', contact_id=t.related_contact.id) }}">{{ t.related_contact.full_name }}</a>
+        {% elif t.related_lead %}<a href="{{ url_for('leads_detail', lead_id=t.related_lead.id) }}">{{ t.related_lead.full_name }}</a>
+        {% elif t.related_opportunity %}<a href="{{ url_for('opps_detail', opp_id=t.related_opportunity.id) }}">{{ t.related_opportunity.name }}</a>
+        {% else %}—{% endif %}
+      </td>
+      <td>{{ t.due_date.isoformat() if t.due_date else '—' }}</td>
+      <td>{{ t.status }}</td>
+      <td>{{ t.owner.name if t.owner else '—' }}</td>
+      <td><form method="post" action="{{ url_for('activities_delete', activity_id=t.id) }}" class="inline"><input type="hidden" name="next" value="{{ request.full_path }}"><button class="btn-link danger" onclick="return confirm('Delete activity?')">Delete</button></form></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="muted center">Nothing here.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ lead.full_name }} · VECO{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="muted small">Lead {% if lead.converted %}<span class="tag tag-green">Converted</span>{% endif %}</div>
+    <h1>{{ lead.full_name }}</h1>
+    <p class="muted">{{ lead.title or '—' }} at <strong>{{ lead.company }}</strong></p>
+  </div>
+  <div class="page-actions">
+    {% if not lead.converted %}<a class="btn btn-primary" href="{{ url_for('leads_convert', lead_id=lead.id) }}">Convert</a>{% endif %}
+    <a class="btn" href="{{ url_for('leads_edit', lead_id=lead.id) }}">Edit</a>
+    <form method="post" action="{{ url_for('leads_delete', lead_id=lead.id) }}" class="inline" onsubmit="return confirm('Delete this lead?')">
+      <button class="btn btn-danger">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="grid grid-3-1">
+  <div>
+    <section class="card">
+      <h2>Details</h2>
+      <dl class="kv">
+        <dt>Status</dt><dd><span class="status-pill status-{{ lead.status|lower }}">{{ lead.status }}</span></dd>
+        <dt>Email</dt><dd>{% if lead.email %}<a href="mailto:{{ lead.email }}">{{ lead.email }}</a>{% else %}—{% endif %}</dd>
+        <dt>Phone</dt><dd>{{ lead.phone or '—' }}</dd>
+        <dt>Industry</dt><dd>{{ lead.industry or '—' }}</dd>
+        <dt>Source</dt><dd>{{ lead.source or '—' }}</dd>
+        <dt>Rating</dt><dd>{{ lead.rating or '—' }}</dd>
+        <dt>Est. value</dt><dd>{{ '${:,.0f}'.format(lead.estimated_value) if lead.estimated_value else '—' }}</dd>
+        <dt>Owner</dt><dd>{{ lead.owner.name if lead.owner else '—' }}</dd>
+        <dt>Created</dt><dd>{{ lead.created_at.strftime('%b %d, %Y') }}</dd>
+      </dl>
+      {% if lead.description %}<p>{{ lead.description }}</p>{% endif %}
+    </section>
+
+    <section class="card"><h2>Log activity</h2>
+      {% set related_kwarg = 'related_lead_id' %}{% set related_id = lead.id %}
+      {% include "_activity_form.html" %}
+    </section>
+    <section class="card"><h2>Add note</h2>
+      {% set related_kwarg = 'related_lead_id' %}{% set related_id = lead.id %}
+      {% include "_note_form.html" %}
+    </section>
+    {% include "_timeline.html" %}
+  </div>
+</div>
+{% endblock %}
