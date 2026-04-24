@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if contact else 'New' }} Contact · VECO{% endblock %}
+{% block content %}
+<div class="page-header"><h1>{{ 'Edit' if contact else 'New' }} Contact</h1></div>
+<form method="post" class="form card">
+  <div class="grid grid-2">
+    <label>First name *<input name="first_name" required value="{{ contact.first_name if contact else '' }}"></label>
+    <label>Last name *<input name="last_name" required value="{{ contact.last_name if contact else '' }}"></label>
+    <label>Title<input name="title" value="{{ contact.title if contact else '' }}"></label>
+    <label>Department<input name="department" value="{{ contact.department if contact else '' }}"></label>
+    <label>Email<input type="email" name="email" value="{{ contact.email if contact else '' }}"></label>
+    <label>Phone<input name="phone" value="{{ contact.phone if contact else '' }}"></label>
+    <label>Mobile<input name="mobile" value="{{ contact.mobile if contact else '' }}"></label>
+    <label>Account
+      <select name="account_id">
+        <option value="">—</option>
+        {% set selected_account = (contact.account_id if contact else prefilled_account) %}
+        {% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if selected_account == a.id else '' }}>{{ a.name }}</option>{% endfor %}
+      </select>
+    </label>
+  </div>
+  <label>Description<textarea name="description" rows="3">{{ contact.description if contact else '' }}</textarea></label>
+  <div class="form-actions">
+    <a class="btn" href="{{ url_for('contacts_detail', contact_id=contact.id) if contact else url_for('contacts_list') }}">Cancel</a>
+    <button class="btn btn-primary" type="submit">Save</button>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,6 @@
+<form class="form inline-form" method="post" action="{{ url_for('notes_new') }}">
+  <input type="hidden" name="next" value="{{ request.path }}">
+  <input type="hidden" name="{{ related_kwarg }}" value="{{ related_id }}">
+  <textarea name="body" rows="2" placeholder="Add a note..." required></textarea>
+  <button class="btn btn-primary" type="submit">Add note</button>
+</form>

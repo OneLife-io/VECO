@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Convert {{ lead.full_name }} · VECO{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Convert lead: {{ lead.full_name }}</h1>
+    <p class="muted">Create an Account, Contact, and (optionally) an Opportunity from this lead.</p>
+  </div>
+</div>
+<form method="post" class="form card">
+  <h2>Account</h2>
+  {% if existing_account %}
+    <label class="checkbox">
+      <input type="radio" name="account_choice" value="existing" checked onchange="document.getElementById('newacctblock').style.display='none'">
+      Use existing account: <strong>{{ existing_account.name }}</strong>
+      <input type="hidden" name="account_id" value="{{ existing_account.id }}">
+    </label>
+    <label class="checkbox">
+      <input type="radio" name="account_choice" value="new" onchange="document.getElementById('newacctblock').style.display='block'; this.form.account_id.value=''">
+      Create a new account instead
+    </label>
+    <div id="newacctblock" style="display:none">
+      <label>New account name<input name="account_name" value="{{ lead.company }}"></label>
+    </div>
+  {% else %}
+    <label>Account name<input name="account_name" value="{{ lead.company }}" required></label>
+  {% endif %}
+
+  <h2>Contact</h2>
+  <p class="muted small">A contact will be created for <strong>{{ lead.full_name }}</strong> ({{ lead.email or 'no email' }}) under the account above.</p>
+
+  <h2>Opportunity</h2>
+  <label class="checkbox"><input type="checkbox" name="create_opportunity" checked> Create an opportunity</label>
+  <div class="grid grid-2">
+    <label>Opportunity name<input name="opportunity_name" value="{{ lead.company }} - New Business"></label>
+    <label>Amount<input type="number" step="0.01" name="amount" value="{{ lead.estimated_value or '' }}"></label>
+    <label>Close date<input type="date" name="close_date"></label>
+  </div>
+
+  <div class="form-actions">
+    <a class="btn" href="{{ url_for('leads_detail', lead_id=lead.id) }}">Cancel</a>
+    <button class="btn btn-primary" type="submit">Convert</button>
+  </div>
+</form>
+{% endblock %}

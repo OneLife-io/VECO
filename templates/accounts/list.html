@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Accounts · VECO{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Accounts</h1><p class="muted">{{ accounts|length }} record{{ '' if accounts|length == 1 else 's' }}</p></div>
+  <div class="page-actions"><a class="btn btn-primary" href="{{ url_for('accounts_new') }}">+ New Account</a></div>
+</div>
+
+<form class="filters" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search by name or city...">
+  <select name="industry">
+    <option value="">All industries</option>
+    {% for i in INDUSTRIES %}<option value="{{ i }}" {{ 'selected' if industry == i else '' }}>{{ i }}</option>{% endfor %}
+  </select>
+  <button class="btn">Apply</button>
+  {% if q or industry %}<a class="btn btn-link" href="{{ url_for('accounts_list') }}">Clear</a>{% endif %}
+</form>
+
+<div class="card no-pad">
+<table class="table">
+  <thead><tr><th>Name</th><th>Industry</th><th>City</th><th class="num">Employees</th><th class="num">Revenue</th><th>Owner</th></tr></thead>
+  <tbody>
+    {% for a in accounts %}
+    <tr>
+      <td><a href="{{ url_for('accounts_detail', account_id=a.id) }}">{{ a.name }}</a></td>
+      <td>{{ a.industry or '—' }}</td>
+      <td>{{ a.billing_city or '—' }}</td>
+      <td class="num">{{ "{:,}".format(a.employees) if a.employees else '—' }}</td>
+      <td class="num">{{ '${:,.0f}'.format(a.annual_revenue) if a.annual_revenue else '—' }}</td>
+      <td>{{ a.owner.name if a.owner else '—' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="muted center">No accounts found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

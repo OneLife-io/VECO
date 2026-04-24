@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ opp.name }} · VECO{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="muted small">Opportunity</div>
+    <h1>{{ opp.name }}</h1>
+    <p class="muted">
+      {% if opp.account %}<a href="{{ url_for('accounts_detail', account_id=opp.account.id) }}">{{ opp.account.name }}</a>{% else %}—{% endif %}
+      · ${{ "{:,.0f}".format(opp.amount or 0) }} · {{ opp.probability }}%
+      {% if opp.close_date %} · close {{ opp.close_date.isoformat() }}{% endif %}
+    </p>
+  </div>
+  <div class="page-actions">
+    <a class="btn" href="{{ url_for('opps_edit', opp_id=opp.id) }}">Edit</a>
+    <form method="post" action="{{ url_for('opps_delete', opp_id=opp.id) }}" class="inline" onsubmit="return confirm('Delete this opportunity?')">
+      <button class="btn btn-danger">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="stage-tracker">
+  {% for s in OPP_STAGES %}
+    <div class="stage-step {{ 'current' if s == opp.stage else '' }} stage-{{ s|replace(' ', '-')|lower }}">{{ s }}</div>
+  {% endfor %}
+</div>
+
+<div class="grid grid-3-1">
+  <div>
+    <section class="card">
+      <h2>Details</h2>
+      <dl class="kv">
+        <dt>Stage</dt><dd><span class="stage stage-{{ opp.stage|replace(' ', '-')|lower }}">{{ opp.stage }}</span></dd>
+        <dt>Amount</dt><dd>${{ "{:,.2f}".format(opp.amount or 0) }}</dd>
+        <dt>Weighted</dt><dd>${{ "{:,.2f}".format(opp.weighted_amount) }}</dd>
+        <dt>Type</dt><dd>{{ opp.type or '—' }}</dd>
+        <dt>Source</dt><dd>{{ opp.source or '—' }}</dd>
+        <dt>Primary contact</dt><dd>{% if opp.contact %}<a href="{{ url_for('contacts_detail', contact_id=opp.contact.id) }}">{{ opp.contact.full_name }}</a>{% else %}—{% endif %}</dd>
+        <dt>Next step</dt><dd>{{ opp.next_step or '—' }}</dd>
+        <dt>Owner</dt><dd>{{ opp.owner.name if opp.owner else '—' }}</dd>
+      </dl>
+      {% if opp.description %}<p>{{ opp.description }}</p>{% endif %}
+    </section>
+
+    <section class="card"><h2>Log activity</h2>
+      {% set related_kwarg = 'related_opportunity_id' %}{% set related_id = opp.id %}
+      {% include "_activity_form.html" %}
+    </section>
+    <section class="card"><h2>Add note</h2>
+      {% set related_kwarg = 'related_opportunity_id' %}{% set related_id = opp.id %}
+      {% include "_note_form.html" %}
+    </section>
+    {% include "_timeline.html" %}
+  </div>
+</div>
+{% endblock %}

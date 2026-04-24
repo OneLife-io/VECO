@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}VECO CRM{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% if current_user.is_authenticated %}
+<header class="topbar">
+  <div class="brand">
+    <a href="{{ url_for('dashboard') }}">
+      <span class="logo">V</span><span class="brand-name">VECO</span>
+      <span class="brand-tag">Sales Cloud</span>
+    </a>
+  </div>
+  <form class="global-search" action="{{ url_for('search') }}" method="get">
+    <input type="search" name="q" placeholder="Search accounts, contacts, leads, opportunities..."
+           value="{{ request.args.get('q', '') }}">
+  </form>
+  <div class="user-menu">
+    <span class="user-name">{{ current_user.name }}</span>
+    <a href="{{ url_for('logout') }}" class="btn-link">Log out</a>
+  </div>
+</header>
+<nav class="mainnav">
+  <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' else '' }}">Home</a>
+  <a href="{{ url_for('leads_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('leads_') else '' }}">Leads</a>
+  <a href="{{ url_for('accounts_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('accounts_') else '' }}">Accounts</a>
+  <a href="{{ url_for('contacts_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('contacts_') else '' }}">Contacts</a>
+  <a href="{{ url_for('opps_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('opps_') else '' }}">Opportunities</a>
+  <a href="{{ url_for('pipeline') }}" class="{{ 'active' if request.endpoint == 'pipeline' else '' }}">Pipeline</a>
+  <a href="{{ url_for('activities_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('activit') else '' }}">Tasks</a>
+  <a href="{{ url_for('reports') }}" class="{{ 'active' if request.endpoint == 'reports' else '' }}">Reports</a>
+</nav>
+{% endif %}
+
+<main class="container">
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% if msgs %}
+      <div class="flashes">
+      {% for category, message in msgs %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

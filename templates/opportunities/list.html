@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Opportunities · VECO{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Opportunities</h1><p class="muted">{{ opps|length }} record{{ '' if opps|length == 1 else 's' }}</p></div>
+  <div class="page-actions">
+    <a class="btn" href="{{ url_for('pipeline') }}">View pipeline</a>
+    <a class="btn btn-primary" href="{{ url_for('opps_new') }}">+ New Opportunity</a>
+  </div>
+</div>
+<form class="filters" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search opportunity name...">
+  <select name="stage">
+    <option value="">All stages</option>
+    {% for s in OPP_STAGES %}<option value="{{ s }}" {{ 'selected' if stage == s else '' }}>{{ s }}</option>{% endfor %}
+  </select>
+  <button class="btn">Apply</button>
+  {% if q or stage %}<a class="btn btn-link" href="{{ url_for('opps_list') }}">Clear</a>{% endif %}
+</form>
+<div class="card no-pad">
+<table class="table">
+  <thead><tr><th>Name</th><th>Account</th><th>Stage</th><th class="num">Amount</th><th class="num">Probability</th><th>Close date</th><th>Owner</th></tr></thead>
+  <tbody>
+    {% for o in opps %}
+    <tr>
+      <td><a href="{{ url_for('opps_detail', opp_id=o.id) }}">{{ o.name }}</a></td>
+      <td>{% if o.account %}<a href="{{ url_for('accounts_detail', account_id=o.account.id) }}">{{ o.account.name }}</a>{% else %}—{% endif %}</td>
+      <td><span class="stage stage-{{ o.stage|replace(' ', '-')|lower }}">{{ o.stage }}</span></td>
+      <td class="num">${{ "{:,.0f}".format(o.amount or 0) }}</td>
+      <td class="num">{{ o.probability }}%</td>
+      <td>{{ o.close_date.isoformat() if o.close_date else '—' }}</td>
+      <td>{{ o.owner.name if o.owner else '—' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="muted center">No opportunities found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

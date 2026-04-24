@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Home · VECO{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Welcome back, {{ current_user.name.split()[0] }}</h1>
+    <p class="muted">Here's what's happening across your CRM today.</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn" href="{{ url_for('leads_new') }}">+ New Lead</a>
+    <a class="btn btn-primary" href="{{ url_for('opps_new') }}">+ New Opportunity</a>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-label">Open pipeline</div><div class="kpi-value">${{ "{:,.0f}".format(pipeline_value) }}</div><div class="kpi-sub">{{ open_opp_count }} open opps</div></div>
+  <div class="kpi"><div class="kpi-label">Weighted pipeline</div><div class="kpi-value">${{ "{:,.0f}".format(weighted_pipeline) }}</div><div class="kpi-sub">probability-weighted</div></div>
+  <div class="kpi"><div class="kpi-label">Won this month</div><div class="kpi-value">${{ "{:,.0f}".format(won_amount_month) }}</div><div class="kpi-sub">{{ won_count_month }} deal{{ '' if won_count_month == 1 else 's' }}</div></div>
+  <div class="kpi"><div class="kpi-label">New leads (7d)</div><div class="kpi-value">{{ new_leads_count }}</div><div class="kpi-sub">last 7 days</div></div>
+</div>
+
+<div class="grid grid-2">
+  <section class="card">
+    <h2>Pipeline by stage</h2>
+    {% if stage_breakdown %}
+      <div class="bar-chart">
+        {% for stage, info in stage_breakdown %}
+          <div class="bar-row">
+            <div class="bar-label">{{ stage }} <span class="muted small">({{ info.count }})</span></div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: {{ (info.value / max_stage_value * 100) | round(1) }}%"></div>
+            </div>
+            <div class="bar-value">${{ "{:,.0f}".format(info.value) }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">No open opportunities yet. <a href="{{ url_for('opps_new') }}">Create one</a>.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Top sellers this month</h2>
+    {% if leaderboard %}
+      <table class="table compact">
+        <thead><tr><th>Rep</th><th class="num">Won</th></tr></thead>
+        <tbody>
+          {% for name, total in leaderboard %}
+            <tr><td>{{ name }}</td><td class="num">${{ "{:,.0f}".format(total) }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No deals closed this month yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>My open tasks</h2>
+    {% if my_open_tasks %}
+      <ul class="task-list">
+        {% for t in my_open_tasks %}
+        <li class="{{ 'overdue' if t.is_overdue else '' }}">
+          <form method="post" action="{{ url_for('activities_complete', activity_id=t.id) }}" class="inline">
+            <input type="hidden" name="next" value="{{ url_for('dashboard') }}">
+            <button class="check" title="Complete">✓</button>
+          </form>
+          <span class="task-type tag">{{ t.type }}</span>
+          <span class="task-subject">{{ t.subject }}</span>
+          {% if t.due_date %}<span class="muted small">· due {{ t.due_date.isoformat() }}</span>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No open tasks. Inbox zero.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Recent activity</h2>
+    {% if recent_activities %}
+      <ul class="timeline">
+        {% for a in recent_activities %}
+        <li>
+          <span class="tag">{{ a.type }}</span>
+          <strong>{{ a.subject }}</strong>
+          {% if a.related_account %}· <a href="{{ url_for('accounts_detail', account_id=a.related_account.id) }}">{{ a.related_account.name }}</a>{% endif %}
+          {% if a.related_opportunity %}· <a href="{{ url_for('opps_detail', opp_id=a.related_opportunity.id) }}">{{ a.related_opportunity.name }}</a>{% endif %}
+          <div class="muted small">{{ a.created_at.strftime('%b %d, %H:%M') }} · {{ a.owner.name if a.owner else '' }}</div>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No activity yet.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Search · VECO{% endblock %}
+{% block content %}
+<div class="page-header"><h1>Search results</h1>{% if q %}<p class="muted">Results for "<strong>{{ q }}</strong>"</p>{% endif %}</div>
+
+{% if not q %}
+  <p class="muted">Enter a query in the top search bar.</p>
+{% else %}
+
+<section class="card"><h2>Accounts ({{ results.accounts|length }})</h2>
+  {% if results.accounts %}<ul class="result-list">
+    {% for a in results.accounts %}<li><a href="{{ url_for('accounts_detail', account_id=a.id) }}">{{ a.name }}</a> <span class="muted small">{{ a.industry or '' }}</span></li>{% endfor %}
+  </ul>{% else %}<p class="muted">No matches.</p>{% endif %}
+</section>
+
+<section class="card"><h2>Contacts ({{ results.contacts|length }})</h2>
+  {% if results.contacts %}<ul class="result-list">
+    {% for c in results.contacts %}<li><a href="{{ url_for('contacts_detail', contact_id=c.id) }}">{{ c.full_name }}</a> <span class="muted small">{{ c.title or '' }}{% if c.account %} · {{ c.account.name }}{% endif %}</span></li>{% endfor %}
+  </ul>{% else %}<p class="muted">No matches.</p>{% endif %}
+</section>
+
+<section class="card"><h2>Leads ({{ results.leads|length }})</h2>
+  {% if results.leads %}<ul class="result-list">
+    {% for l in results.leads %}<li><a href="{{ url_for('leads_detail', lead_id=l.id) }}">{{ l.full_name }}</a> <span class="muted small">{{ l.company }} · {{ l.status }}</span></li>{% endfor %}
+  </ul>{% else %}<p class="muted">No matches.</p>{% endif %}
+</section>
+
+<section class="card"><h2>Opportunities ({{ results.opportunities|length }})</h2>
+  {% if results.opportunities %}<ul class="result-list">
+    {% for o in results.opportunities %}<li><a href="{{ url_for('opps_detail', opp_id=o.id) }}">{{ o.name }}</a> <span class="muted small">{{ o.stage }} · ${{ "{:,.0f}".format(o.amount or 0) }}</span></li>{% endfor %}
+  </ul>{% else %}<p class="muted">No matches.</p>{% endif %}
+</section>
+
+{% endif %}
+{% endblock %}

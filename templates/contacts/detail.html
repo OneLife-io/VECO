@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ contact.full_name }} · VECO{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="muted small">Contact</div>
+    <h1>{{ contact.full_name }}</h1>
+    <p class="muted">{{ contact.title or '—' }}{% if contact.account %} · <a href="{{ url_for('accounts_detail', account_id=contact.account.id) }}">{{ contact.account.name }}</a>{% endif %}</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn" href="{{ url_for('contacts_edit', contact_id=contact.id) }}">Edit</a>
+    <form method="post" action="{{ url_for('contacts_delete', contact_id=contact.id) }}" class="inline" onsubmit="return confirm('Delete this contact?')">
+      <button class="btn btn-danger">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="grid grid-3-1">
+  <div>
+    <section class="card">
+      <h2>Details</h2>
+      <dl class="kv">
+        <dt>Email</dt><dd>{% if contact.email %}<a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% else %}—{% endif %}</dd>
+        <dt>Phone</dt><dd>{{ contact.phone or '—' }}</dd>
+        <dt>Mobile</dt><dd>{{ contact.mobile or '—' }}</dd>
+        <dt>Department</dt><dd>{{ contact.department or '—' }}</dd>
+        <dt>Owner</dt><dd>{{ contact.owner.name if contact.owner else '—' }}</dd>
+      </dl>
+      {% if contact.description %}<p>{{ contact.description }}</p>{% endif %}
+    </section>
+
+    <section class="card"><h2>Log activity</h2>
+      {% set related_kwarg = 'related_contact_id' %}{% set related_id = contact.id %}
+      {% include "_activity_form.html" %}
+    </section>
+    <section class="card"><h2>Add note</h2>
+      {% set related_kwarg = 'related_contact_id' %}{% set related_id = contact.id %}
+      {% include "_note_form.html" %}
+    </section>
+    {% include "_timeline.html" %}
+  </div>
+</div>
+{% endblock %}

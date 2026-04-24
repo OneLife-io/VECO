@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Pipeline · VECO{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Pipeline</h1><p class="muted">Drag cards between stages to update.</p></div>
+  <div class="page-actions"><a class="btn btn-primary" href="{{ url_for('opps_new') }}">+ New Opportunity</a></div>
+</div>
+
+<div class="kanban">
+  {% for stage in OPP_STAGES %}
+    {% set opps = by_stage.get(stage, []) %}
+    <div class="kanban-col" data-stage="{{ stage }}">
+      <div class="kanban-col-header stage-{{ stage|replace(' ', '-')|lower }}">
+        <div class="stage-name">{{ stage }}</div>
+        <div class="stage-meta">{{ opps|length }} · ${{ "{:,.0f}".format(totals.get(stage, 0)) }}</div>
+      </div>
+      <div class="kanban-cards">
+        {% for o in opps %}
+          <div class="kanban-card" draggable="true" data-id="{{ o.id }}">
+            <a href="{{ url_for('opps_detail', opp_id=o.id) }}">{{ o.name }}</a>
+            <div class="muted small">{% if o.account %}{{ o.account.name }}{% endif %}</div>
+            <div class="card-meta">
+              <span>${{ "{:,.0f}".format(o.amount or 0) }}</span>
+              {% if o.close_date %}<span class="muted small">· {{ o.close_date.isoformat() }}</span>{% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
