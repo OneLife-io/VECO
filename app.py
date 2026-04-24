@@ -8,6 +8,7 @@ Run:
 import os
 from datetime import datetime, date, timedelta
 from collections import defaultdict
+from urllib.parse import urlparse
 
 from flask import (
     Flask, render_template, request, redirect, url_for, flash, jsonify, abort
@@ -64,6 +65,13 @@ def create_app():
         except ValueError:
             return None
 
+    def _is_safe_redirect_target(target):
+        if not target:
+            return False
+        normalized = target.replace("\\", "")
+        parsed = urlparse(normalized)
+        return not parsed.netloc and not parsed.scheme
+
     @app.context_processor
     def inject_globals():
         return {
@@ -105,7 +113,10 @@ def create_app():
             user = User.query.filter_by(email=email).first()
             if user and user.check_password(password):
                 login_user(user)
-                return redirect(request.args.get("next") or url_for("dashboard"))
+                next_url = request.args.get("next")
+                if _is_safe_redirect_target(next_url):
+                    return redirect(next_url)
+                return redirect(url_for("dashboard"))
             flash("Invalid email or password.", "error")
         return render_template("login.html")
 
