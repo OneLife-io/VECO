@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if opp else 'New' }} Opportunity · VECO{% endblock %}
+{% block content %}
+<div class="page-header"><h1>{{ 'Edit' if opp else 'New' }} Opportunity</h1></div>
+<form method="post" class="form card">
+  <div class="grid grid-2">
+    <label>Name *<input name="name" required value="{{ opp.name if opp else '' }}"></label>
+    <label>Account
+      <select name="account_id">
+        <option value="">—</option>
+        {% set selected_account = (opp.account_id if opp else prefilled_account) %}
+        {% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if selected_account == a.id else '' }}>{{ a.name }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Primary contact
+      <select name="contact_id">
+        <option value="">—</option>
+        {% for c in contacts %}<option value="{{ c.id }}" {{ 'selected' if opp and opp.contact_id == c.id else '' }}>{{ c.full_name }}{% if c.account %} — {{ c.account.name }}{% endif %}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Stage
+      <select name="stage">
+        {% for s in OPP_STAGES %}<option value="{{ s }}" {{ 'selected' if opp and opp.stage == s else ('selected' if not opp and s == 'Prospecting' else '') }}>{{ s }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Amount<input type="number" step="0.01" name="amount" value="{{ opp.amount if opp else '' }}"></label>
+    <label>Probability (%)<input type="number" min="0" max="100" name="probability" value="{{ opp.probability if opp else 10 }}"></label>
+    <label>Close date<input type="date" name="close_date" value="{{ opp.close_date.isoformat() if opp and opp.close_date else '' }}"></label>
+    <label>Type
+      <select name="type">
+        <option value="">—</option>
+        {% for t in ['New Business', 'Renewal', 'Upsell', 'Cross-sell'] %}
+          <option value="{{ t }}" {{ 'selected' if opp and opp.type == t else '' }}>{{ t }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Source
+      <select name="source">
+        <option value="">—</option>
+        {% for s in ['Web', 'Referral', 'Event', 'Cold Outreach', 'Partner', 'Advertising'] %}
+          <option value="{{ s }}" {{ 'selected' if opp and opp.source == s else '' }}>{{ s }}</option>{% endfor %}
+      </select>
+    </label>
+  </div>
+  <label>Next step<input name="next_step" value="{{ opp.next_step if opp else '' }}"></label>
+  <label>Description<textarea name="description" rows="3">{{ opp.description if opp else '' }}</textarea></label>
+  <div class="form-actions">
+    <a class="btn" href="{{ url_for('opps_detail', opp_id=opp.id) if opp else url_for('opps_list') }}">Cancel</a>
+    <button class="btn btn-primary" type="submit">Save</button>
+  </div>
+</form>
+{% endblock %}

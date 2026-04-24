@@ -1,3 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+veco.db
+*.sqlite
+*.sqlite3
+.venv/
+venv/
+
 # Dependencies
 node_modules/
 

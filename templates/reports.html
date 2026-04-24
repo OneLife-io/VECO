@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Reports · VECO{% endblock %}
+{% block content %}
+<div class="page-header"><h1>Reports</h1></div>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-label">Won this month</div><div class="kpi-value">${{ "{:,.0f}".format(won_month) }}</div></div>
+  <div class="kpi"><div class="kpi-label">Won this quarter</div><div class="kpi-value">${{ "{:,.0f}".format(won_quarter) }}</div></div>
+  <div class="kpi"><div class="kpi-label">Won YTD</div><div class="kpi-value">${{ "{:,.0f}".format(won_year) }}</div></div>
+  <div class="kpi"><div class="kpi-label">Win rate</div><div class="kpi-value">{{ "{:.0f}%".format(win_rate) }}</div><div class="kpi-sub">{{ won_count }} / {{ closed_count }} closed</div></div>
+</div>
+
+<div class="grid grid-2">
+  <section class="card">
+    <h2>Pipeline by industry</h2>
+    {% if industry_rows %}
+    <table class="table compact">
+      <thead><tr><th>Industry</th><th class="num">Open value</th></tr></thead>
+      <tbody>{% for industry, total in industry_rows %}
+        <tr><td>{{ industry or '—' }}</td><td class="num">${{ "{:,.0f}".format(total) }}</td></tr>
+      {% endfor %}</tbody>
+    </table>
+    {% else %}<p class="muted">No data.</p>{% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Lead source breakdown</h2>
+    {% if source_rows %}
+    <table class="table compact">
+      <thead><tr><th>Source</th><th class="num">Leads</th></tr></thead>
+      <tbody>{% for source, count in source_rows %}
+        <tr><td>{{ source or '—' }}</td><td class="num">{{ count }}</td></tr>
+      {% endfor %}</tbody>
+    </table>
+    {% else %}<p class="muted">No data.</p>{% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Top accounts by open pipeline</h2>
+    {% if top_accounts %}
+    <table class="table compact">
+      <thead><tr><th>Account</th><th class="num">Open value</th></tr></thead>
+      <tbody>{% for id, name, total in top_accounts %}
+        <tr><td><a href="{{ url_for('accounts_detail', account_id=id) }}">{{ name }}</a></td><td class="num">${{ "{:,.0f}".format(total) }}</td></tr>
+      {% endfor %}</tbody>
+    </table>
+    {% else %}<p class="muted">No open pipeline yet.</p>{% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Aging open opportunities</h2>
+    {% if aging %}
+    <table class="table compact">
+      <thead><tr><th>Opportunity</th><th>Stage</th><th class="num">Days open</th></tr></thead>
+      <tbody>{% for opp, days in aging %}
+        <tr><td><a href="{{ url_for('opps_detail', opp_id=opp.id) }}">{{ opp.name }}</a></td>
+        <td><span class="stage stage-{{ opp.stage|replace(' ', '-')|lower }}">{{ opp.stage }}</span></td>
+        <td class="num">{{ days }}</td></tr>
+      {% endfor %}</tbody>
+    </table>
+    {% else %}<p class="muted">No open opportunities.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

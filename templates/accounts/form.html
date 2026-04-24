@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if account else 'New' }} Account · VECO{% endblock %}
+{% block content %}
+<div class="page-header"><h1>{{ 'Edit' if account else 'New' }} Account</h1></div>
+<form class="form card" method="post">
+  <div class="grid grid-2">
+    <label>Name *<input name="name" required value="{{ account.name if account else '' }}"></label>
+    <label>Industry
+      <select name="industry">
+        <option value="">—</option>
+        {% for i in INDUSTRIES %}<option value="{{ i }}" {{ 'selected' if account and account.industry == i else '' }}>{{ i }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Website<input name="website" value="{{ account.website if account else '' }}"></label>
+    <label>Phone<input name="phone" value="{{ account.phone if account else '' }}"></label>
+    <label>Employees<input name="employees" type="number" value="{{ account.employees if account else '' }}"></label>
+    <label>Annual revenue<input name="annual_revenue" type="number" step="0.01" value="{{ account.annual_revenue if account else '' }}"></label>
+    <label>Billing city<input name="billing_city" value="{{ account.billing_city if account else '' }}"></label>
+    <label>Billing country<input name="billing_country" value="{{ account.billing_country if account else '' }}"></label>
+  </div>
+  <label>Description<textarea name="description" rows="3">{{ account.description if account else '' }}</textarea></label>
+  <div class="form-actions">
+    <a class="btn" href="{{ url_for('accounts_detail', account_id=account.id) if account else url_for('accounts_list') }}">Cancel</a>
+    <button class="btn btn-primary" type="submit">Save</button>
+  </div>
+</form>
+{% endblock %}
